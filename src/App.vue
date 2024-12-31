@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { Button } from "@/components/ui/button";
+import Login from "@/views/LoginView.vue";
 </script>
 
 <template>
-  <Button>Click me</Button>
-  <HelloWorld msg="Vite + Vue" />
+  <Login />
 </template>
