@@ -15,3 +15,10 @@ export const login = async ({
   });
   return response?.data;
 };
+
+export const passwordRecovery = async (email: string) => {
+  const response = await api.post(ENDPOINTS.passwordRecovery, {
+    email,
+  });
+  return response?.data;
+};
