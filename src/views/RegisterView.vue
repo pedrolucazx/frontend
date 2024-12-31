@@ -2,8 +2,7 @@
 import { AutoForm } from "@/components/ui/auto-form";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast/use-toast";
-import { login, type LoginRequest } from "@/services/http/login";
-import { useSessionStore } from "@/store/session";
+import { register, type LoginRequest } from "@/services/http/login";
 import { useRouter } from "vue-router";
 import * as zod from "zod";
 
@@ -18,40 +17,23 @@ const schema = zod.object({
     .min(8, { message: "A senha deve ter pelo menos 8 caracteres." }),
 });
 
-const sessionStore = useSessionStore();
-
 async function onSubmit({ email, password }: LoginRequest) {
   try {
-    const { access_token } = await login({ email, password });
-    const payload = JSON.parse(atob(access_token.split(".")[1]));
-    const sessionData = {
-      id: payload.sub,
-      email: payload.username,
-      role: payload.role,
-      access_token,
-    };
-
-    await sessionStore.setSession(sessionData);
+    await register({ email, password });
     toast({
-      title: "Login realizado com sucesso",
+      title: "Cadastri realizado com sucesso",
       description: "Bem-vindo de volta!",
       class: "bg-green-500 text-white",
     });
+    router.push("/");
   } catch (error) {
-    console.error("Login failed:", error);
+    console.error("Register failed:", error);
     toast({
       title: "Erro",
       description: "Falha ao fazer login. Verifique suas credenciais.",
       class: "bg-red-500 text-white",
     });
   }
-}
-
-function navigateToPasswordRecovery() {
-  router.push("/recover-password");
-}
-function register() {
-  router.push("/register");
 }
 </script>
 
@@ -79,19 +61,7 @@ function register() {
         }"
         @submit="onSubmit"
       >
-        <div class="text-right">
-          <a
-            href="#"
-            @click.prevent="navigateToPasswordRecovery"
-            class="font-medium text-sm leading-none"
-          >
-            Esqueceu sua senha?
-          </a>
-        </div>
-        <Button type="submit" class="w-full">Enviar</Button>
-        <Button type="submit" class="w-full" @click.prevent="register"
-          >Cadastrar-se</Button
-        >
+        <Button type="submit" class="w-full">Cadastrar</Button>
       </AutoForm>
     </div>
   </div>
