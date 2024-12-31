@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { AutoForm } from "@/components/ui/auto-form";
 import { Button } from "@/components/ui/button";
-import { useSessionStore } from "@/store/session";
-import * as zod from "zod";
+import { useToast } from "@/components/ui/toast/use-toast";
 import { login, type LoginRequest } from "@/services/http/login";
+import { useSessionStore } from "@/store/session";
+import { useRouter } from "vue-router";
+import * as zod from "zod";
 
+const { toast } = useToast();
+const router = useRouter();
 const schema = zod.object({
   email: zod
     .string({ required_error: "E-mail é obrigatório." })
@@ -18,21 +22,33 @@ const sessionStore = useSessionStore();
 
 async function onSubmit({ email, password }: LoginRequest) {
   try {
-    const data = await login({ email, password });
-    const token = data.token;
-    const payload = JSON.parse(atob(token.split(".")[1]));
-
+    const { access_token } = await login({ email, password });
+    const payload = JSON.parse(atob(access_token.split(".")[1]));
     const sessionData = {
       id: payload.sub,
       email: payload.username,
       role: payload.role,
-      token,
+      access_token,
     };
 
     await sessionStore.setSession(sessionData);
+    toast({
+      title: "Login realizado com sucesso",
+      description: "Bem-vindo de volta!",
+      class: "bg-green-500 text-white",
+    });
   } catch (error) {
     console.error("Login failed:", error);
+    toast({
+      title: "Erro",
+      description: "Falha ao fazer login. Verifique suas credenciais.",
+      class: "bg-red-500 text-white",
+    });
   }
+}
+
+function navigateToPasswordRecovery() {
+  router.push("/recover-password");
 }
 </script>
 
@@ -60,6 +76,15 @@ async function onSubmit({ email, password }: LoginRequest) {
         }"
         @submit="onSubmit"
       >
+        <div class="text-right">
+          <a
+            href="#"
+            @click.prevent="navigateToPasswordRecovery"
+            class="font-medium text-sm leading-none"
+          >
+            Esqueceu sua senha?
+          </a>
+        </div>
         <Button type="submit" class="w-full">Enviar</Button>
       </AutoForm>
     </div>
